@@ -1,0 +1,16 @@
+server:
+  #context-path: /weixinzkm
+  port: 8080
+spring:
+ thymeleaf:
+   cache: false
+   prefix: classpath:/templates/
+   suffix: .html
+   encoding: UTF-8
+   content-type: text/html
+   mode: HTML5
+
+wechat:
+  mpAppId: wx490c861a42629ff7
+  mpAppSecret: 6dfe7d94fc1d705e92af74d7827de57d
+   

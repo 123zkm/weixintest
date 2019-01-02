@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<title>Insert title here</title>
+</head>
+<body>
+	<span class="desc">拍照或从手机相册中选图接口</span>
+	<button class="btn btn_primary" id="chooseImage" onclick="openCamera()">>chooseImage</button>
+	<span>图片预览</span>
+	<div id="photo"></div>
+
+</body>
+<script type="text/javascript"
+	src="http://res.wx.qq.com/open/js/jweixin-1.4.0.js"></script>
+<script type="text/javascript" src="/js/jquery-3.3.1.min.js"></script>
+<script th:inline="javascript">
+$(function (){
+	wx.config({
+		debug : false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+		appId : [[${jsapiSignature.appId}]], // 必填，公众号的唯一标识
+		timestamp : [[${jsapiSignature.timestamp}]], // 必填，生成签名的时间戳
+		nonceStr : [[${jsapiSignature.nonceStr}]], // 必填，生成签名的随机串
+		signature : [[${jsapiSignature.signature}]],// 必填，签名
+		jsApiList : [ 'chooseImage', 'uploadImage' ]
+	// 必填，需要使用的JS接口列表
+	});
+
+});
+
+function openCamera(){
+    wx.chooseImage({
+        count: 3, // 默认9
+        sizeType: ['original', 'compressed'], // 指定是原图还是压缩图，默认都有
+        sourceType: ['album', 'camera'], // 指定来源是相册还是相机，默认都有
+        success: function (res) {
+            var localIds = res.localIds; // 返回选定照片的本地ID列表，localId可以作为img标签的src属性显示图片
+            alert(localIds);
+            for( var i in localIds ){
+            wx.uploadImage({
+                localId: localIds[i].toString(), // 需要上传的图片的ID，由chooseImage接口获得
+                isShowProgressTips: 1, // 进度提示
+                success: function (res) {
+                    var mediaId = res.serverId; // 返回图片的服务器端ID，即mediaId
+                    alert(mediaId);
+                    //将获取到的 mediaId 传入后台 方法savePicture
+                    $.post("/test/mediaDownload",{"mediaId":mediaId,"tmp":"填写证件的正反面参数"},function(res){
+                        //填写你自己的业务逻辑
+                    	alert(res.result);
+                    });
+                },
+                fail: function (res) {
+                    alertModal('图片上传失败，请重试');
+                }
+            }); 
+            var imgHTML="<img src="+localIds[i].toString()+"/>" ;
+        	$("#photo").append(imgHTML);
+            }
+        }
+    });
+}
+
+</script>
+</html>
